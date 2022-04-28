@@ -32,8 +32,8 @@ export interface BreakpointsState {
 export function initialBreakpointsState(): BreakpointsState {
   return {
     breakpoints: {},
-    requestedBreakpoints: {},
     breakpointsDisabled: false,
+    requestedBreakpoints: {},
   };
 }
 
@@ -44,6 +44,7 @@ function update(state = initialBreakpointsState(), action: AnyAction) {
     }
 
     case "SET_BREAKPOINT": {
+      console.log(`SET_BREAKPOINT`, action.breakpoint);
       return setBreakpoint(state, action);
     }
 
