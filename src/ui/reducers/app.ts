@@ -20,6 +20,7 @@ import { getSelectedPanel, getViewMode } from "./layout";
 import { prefs } from "ui/utils/prefs";
 import { getNonLoadingRegionTimeRanges } from "ui/utils/app";
 import { getSystemColorSchemePreference } from "ui/utils/environment";
+import { overlap } from "ui/actions/timeline";
 
 export const initialAppState: AppState = {
   mode: "devtools",
@@ -79,7 +80,14 @@ export default function update(
         ...action.parameters.loading.map(r => r.end.time),
         state.recordingDuration
       );
-      return { ...state, loadedRegions: action.parameters, recordingDuration };
+      return {
+        ...state,
+        loadedRegions: {
+          ...action.parameters,
+          indexedAndLoaded: overlap(action.parameters.indexed, action.parameters.loaded),
+        },
+        recordingDuration,
+      };
     }
 
     case "set_expected_error": {
@@ -267,17 +275,16 @@ export const getIndexingProgress = (state: UIState) => {
     return null;
   }
 
-  const { loading, indexed } = regions;
+  const { loading, indexedAndLoaded } = regions;
 
-  const indexedProgress = indexed
-    .filter(indexedRegion => {
+  const indexedProgress = indexedAndLoaded
+    .filter(region => {
       // It's possible for the indexedProgress to not be a subset of
       // loadingRegions. This acts as a guard if that should happen.
       // Todo: Investigate this on the backend.
       return loading.some(
         loadingRegion =>
-          indexedRegion.begin.time >= loadingRegion.begin.time &&
-          indexedRegion.end.time <= loadingRegion.end.time
+          region.begin.time >= loadingRegion.begin.time && region.end.time <= loadingRegion.end.time
       );
     })
     .reduce((sum, region) => sum + (region.end.time - region.begin.time), 0);

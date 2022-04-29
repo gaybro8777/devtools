@@ -75,6 +75,7 @@ export interface LoadedRegions {
   loading: TimeStampedPointRange[];
   loaded: TimeStampedPointRange[];
   indexed: TimeStampedPointRange[];
+  indexedAndLoaded: TimeStampedPointRange[];
 }
 
 export interface AppState {

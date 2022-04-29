@@ -1,4 +1,4 @@
-import { ExecutionPoint, PauseId } from "@recordreplay/protocol";
+import { ExecutionPoint, PauseId, TimeStampedPointRange } from "@recordreplay/protocol";
 import { Pause, ThreadFront } from "protocol/thread";
 import { client, log, sendMessage } from "protocol/socket";
 import {
@@ -550,6 +550,22 @@ export function updateFocusRegion(operation: FocusOperation): UIThunkAction {
     dispatch(setFocusRegion({ ...focusRegion, [type]: value }));
   };
 }
+
+export const overlap = (a: TimeStampedPointRange[], b: TimeStampedPointRange[]) => {
+  const overlapping: TimeStampedPointRange[] = [];
+  a.forEach(aRegion => {
+    b.forEach(bRegion => {
+      console.log(aRegion, bRegion);
+      if (aRegion.begin.time <= bRegion.end.time && aRegion.end.time >= bRegion.begin.time) {
+        overlapping.push({
+          begin: aRegion.begin.time > bRegion.begin.time ? aRegion.begin : bRegion.begin,
+          end: aRegion.end.time < bRegion.end.time ? aRegion.end : bRegion.end,
+        });
+      }
+    });
+  });
+  return overlapping;
+};
 
 export function syncFocusedRegion(): UIThunkAction {
   return async (dispatch, getState) => {
